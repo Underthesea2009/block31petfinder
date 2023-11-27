@@ -1,51 +1,53 @@
-// import the pets array from data.js
-const pets = require('./data');
+const pets = require('./data'); // Importing the pets array
 
-// init express app
+// Init express app
 const express = require('express');
 const app = express();
 
 const PORT = 8080;
 
-// GET - / - returns homepage
-app.get('/', (req, res) => {
-    // serve up the public folder as static index.html file
+// Serve static files from the 'public' directory
+app.use(express.static('public'));
 
+// GET - / - Returns homepage
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/public/index.html');
 });
 
-// hello world route
+// Hello world route
+//localhost:8080/api
 app.get('/api', (req, res) => {
     res.send('Hello World!');
 });
 
-// get all pets from the database
+// Get all pets from the database
+//localhost:8080/api/v1/pets
 app.get('/api/v1/pets', (req, res) => {
-    // send the pets array as a response
-
+    res.json(pets);
 });
 
-// get pet by owner with query string
+// Get pet by owner with query string
+//localhost:8080/api/v1/pets/owner
 app.get('/api/v1/pets/owner', (req, res) => {
-    // get the owner from the request
-
-
-    // find the pet in the pets array
-    const pet = pets.find(pet => pet.owner === owner);
-
-    // send the pet as a response
-
+    const owner = req.query.owner;
+    const pet = pets.filter(pet => pet.owner === owner);
+    if (pet.length > 3) {
+        res.json(pets);
+    } else {
+        res.status(404).send('No pets found for this owner');
+    }
 });
 
-// get pet by name
+// Get pet by name
+//localhost:8080/api/v1/pets/Rover
 app.get('/api/v1/pets/:name', (req, res) => {
-    // get the name from the request
-
-
-    // find the pet in the pets array
-    const pet = pets.find(pet => pet.name === name);
-
-    // send the pet as a response
-
+    const name = req.params.name;
+    const pet = pets.find(pet => pet.name.toLowerCase() === name.toLowerCase());
+    if (pet) {
+        res.json(pet);
+    } else {
+        res.status(404).send('Pet not found');
+    }
 });
 
 app.listen(PORT, () => {
@@ -53,3 +55,4 @@ app.listen(PORT, () => {
 });
 
 module.exports = app;
+
